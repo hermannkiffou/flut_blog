@@ -1,19 +1,18 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flut_blog/blog.dart';
-import 'package:flut_blog/inscription.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flut_blog/homePage.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class HomePage extends StatefulWidget {
-  static const String id = 'homepage';
+class Inscription extends StatefulWidget {
+  static const String id = "inscription";
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<Inscription> createState() => _InscriptionState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _InscriptionState extends State<Inscription> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-
   TextEditingController confirmPasswordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -21,26 +20,33 @@ class _HomePageState extends State<HomePage> {
   String message = "";
   bool loading = false;
 
-  Future<void> connexion() async {
+  Future<void> createUser() async {
     setState(() {
       loading = true;
     });
     try {
       if (_formKey.currentState!.validate()) {
-        final connectUser = await _auth.signInWithEmailAndPassword(
+        final newUser = await _auth.createUserWithEmailAndPassword(
             email: emailController.text, password: passwordController.text);
-        if (connectUser != null) {
-          Navigator.pushNamed(context, BlogPage.id);
+        if (newUser != null) {
+          // Navigator.pushNamed(context, Contacts.id);
+          setState(() {
+            message = "Utilisateur créé avec succes";
+          });
+          Navigator.pushNamed(context, HomePage.id);
         } else {
           setState(() {
-            message = "Adresse email ou mot de passe incorrecte";
+            message = "Echec ! Ce compte existe deja !";
           });
         }
       }
-    } catch (error) {
-      setState(() {
-        message = "Echec de la connexion. verifier vos coordonnées";
-      });
+    } on FirebaseAuthException catch (e) {
+      print(e.code);
+      if (e.code == "email-already-in-use") {
+        setState(() {
+          message = "Utilisateur exist deja ";
+        });
+      }
     }
     setState(() {
       loading = false;
@@ -59,7 +65,7 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                'CONNEXION',
+                'INSCRIPTION',
                 style: TextStyle(
                   fontSize: 30,
                 ),
@@ -75,7 +81,7 @@ class _HomePageState extends State<HomePage> {
               TextFormField(
                   controller: emailController,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(hintText: "Email"),
+                  decoration: InputDecoration(hintText: "Adresse Email"),
                   validator: (value) {
                     if (value!.isEmpty) {
                       return "Veillez renseigner votre email";
@@ -92,27 +98,47 @@ class _HomePageState extends State<HomePage> {
                   ),
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return "Veillez renseigner votre Mot de passe";
+                      return "Vous devez renseigner le mot de passe";
                     } else {
                       return null;
+                    }
+                  }),
+              TextFormField(
+                  controller: confirmPasswordController,
+                  obscureText: true,
+                  keyboardType: TextInputType.text,
+                  decoration: InputDecoration(
+                    hintText: "Confiremation de Mot de passe",
+                  ),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return "Vous devez confirmer le mot de passe!";
+                    } else {
+                      if (passwordController.text !=
+                          confirmPasswordController.text) {
+                        return "Mot de passe et confirmation non identique";
+                      } else {
+                        return null;
+                      }
                     }
                   }),
               loading
                   ? CircularProgressIndicator()
                   : ElevatedButton(
                       onPressed: () {
-                        connexion();
+                        createUser();
                       },
-                      child: Text("Se connecter"),
+                      child: Text("S'inscrire"),
                     ),
               TextButton(
-                onPressed: () => Navigator.pushNamed(context, Inscription.id),
-                child: Text("Je n'ai pas de compte"),
+                onPressed: () => Navigator.pushNamed(context, HomePage.id),
+                child: Text("J'ai déjà un compte"),
               ),
             ],
           ),
         ),
       ),
     );
+    ;
   }
 }

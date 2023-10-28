@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "639156209644",
+    "project_id": "flutblog",
+    "storage_bucket": "flutblog.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:639156209644:android:bda9ba72e446932bb262c9",
+        "android_client_info": {
+          "package_name": "com.example.flut_blog"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDssRu7IyCFPCApKOTHooSpkc_m1CcvaX0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
