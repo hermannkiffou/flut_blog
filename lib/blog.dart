@@ -42,7 +42,17 @@ class _BlogPageState extends State<BlogPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Bienvenue $userEmail"),
+        automaticallyImplyLeading: false,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [Text("Bienvenue "), Text(userEmail)],
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Déconnexion", style: TextStyle(color: Colors.white)))
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -54,6 +64,58 @@ class _BlogPageState extends State<BlogPage> {
                 fontSize: 30,
               ),
             )),
+            StreamBuilder(
+              stream: _firestore
+                  .collection('blog')
+                  .where('user', isEqualTo: userId)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text("Erreur de chargement des données !"),
+                  );
+                }
+
+                if (!snapshot.hasData) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                QuerySnapshot data = snapshot.requireData as QuerySnapshot;
+                return Expanded(
+                  child: ListView.builder(
+                      itemCount: data.size,
+                      itemBuilder: (context, index) {
+                        Map item = data.docs[index].data() as Map;
+                        return Card(
+                          child: ListTile(
+                            leading: Icon(Icons.article),
+                            title: item['title'],
+                            subtitle: item['content'],
+                            trailing: Column(
+                              children: [
+                                IconButton(
+                                  onPressed: () {
+                                    print(
+                                        "Edit $index - id: ${item['documentID']}");
+                                  },
+                                  icon: Icon(Icons.edit),
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    print(
+                                        "Delete $index  - id: ${item['documentID']}");
+                                  },
+                                  icon: Icon(Icons.delete),
+                                )
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
+                );
+              },
+            ),
           ],
         ),
       ),

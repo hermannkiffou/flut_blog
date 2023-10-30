@@ -30,6 +30,8 @@ class _HomePageState extends State<HomePage> {
         final connectUser = await _auth.signInWithEmailAndPassword(
             email: emailController.text, password: passwordController.text);
         if (connectUser != null) {
+          emailController.clear();
+          passwordController.clear();
           Navigator.pushNamed(context, BlogPage.id);
         } else {
           setState(() {
