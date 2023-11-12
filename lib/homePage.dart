@@ -50,6 +50,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+
+    emailController.text = '@';
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),

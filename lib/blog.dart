@@ -1,7 +1,7 @@
 import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flut_blog/controllers/blogController.dart';
 import 'package:flutter/material.dart';
 
 class BlogPage extends StatefulWidget {
@@ -20,13 +20,23 @@ class _BlogPageState extends State<BlogPage> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
   String message = "";
   bool loading = false;
   String userId = "";
   String userEmail = "";
+  String blogId = "";
+
+  getBlogId() {
+    BlogController blogController = BlogController();
+    setState(() {
+      blogId = blogController.getBlogId(_auth.currentUser!.uid);
+    });
+  }
 
   @override
   void initState() {
+    print(_allBlogs);
     // TODO: implement initState
     var currentUser = auth.currentUser;
     if (currentUser != null) {
@@ -38,6 +48,8 @@ class _BlogPageState extends State<BlogPage> {
     super.initState();
   }
 
+  final Stream<QuerySnapshot> _allBlogs =
+      FirebaseFirestore.instance.collection('blog').snapshots();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,79 +58,22 @@ class _BlogPageState extends State<BlogPage> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
-          children: [Text("Bienvenue "), Text(userEmail)],
+          children: [
+            Text("Bienvenue "),
+            Text(userEmail),
+          ],
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text("Déconnexion", style: TextStyle(color: Colors.white)))
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              "Déconnexion",
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Center(
-                child: Text(
-              "List de Mes blogs",
-              style: TextStyle(
-                fontSize: 30,
-              ),
-            )),
-            StreamBuilder(
-              stream: _firestore
-                  .collection('blog')
-                  .where('user', isEqualTo: userId)
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text("Erreur de chargement des données !"),
-                  );
-                }
-
-                if (!snapshot.hasData) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-                QuerySnapshot data = snapshot.requireData as QuerySnapshot;
-                return Expanded(
-                  child: ListView.builder(
-                      itemCount: data.size,
-                      itemBuilder: (context, index) {
-                        Map item = data.docs[index].data() as Map;
-                        return Card(
-                          child: ListTile(
-                            leading: Icon(Icons.article),
-                            title: item['title'],
-                            subtitle: item['content'],
-                            trailing: Column(
-                              children: [
-                                IconButton(
-                                  onPressed: () {
-                                    print(
-                                        "Edit $index - id: ${item['documentID']}");
-                                  },
-                                  icon: Icon(Icons.edit),
-                                ),
-                                IconButton(
-                                  onPressed: () {
-                                    print(
-                                        "Delete $index  - id: ${item['documentID']}");
-                                  },
-                                  icon: Icon(Icons.delete),
-                                )
-                              ],
-                            ),
-                          ),
-                        );
-                      }),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+      body: BlogController(),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           titleController.clear();
@@ -229,3 +184,126 @@ class _BlogPageState extends State<BlogPage> {
     );
   }
 }
+
+
+//  SingleChildScrollView(
+//         child: Column(
+//           children: [
+//             const Center(
+//                 child: Text(
+//               "List de Mes blogs",
+//               style: TextStyle(
+//                 fontSize: 30,
+//               ),
+//             )),
+//             // StreamBuilder(
+//             //   stream: _firestore
+//             //       .collection('blog')
+//             //       .where('user', isEqualTo: userId)
+//             //       .snapshots(),
+//             //   builder: (context, snapshot) {
+//             //     if (snapshot.hasError) {
+//             //       return const Center(
+//             //         child: Text("Erreur de chargement des données !"),
+//             //       );
+//             //     }
+//             //     if (!snapshot.hasData) {
+//             //       return Center(
+//             //         child: CircularProgressIndicator(),
+//             //       );
+//             //     }
+
+//             //     QuerySnapshot data = snapshot.requireData as QuerySnapshot;
+
+//             //     return Expanded(
+//             //       child: ListView.builder(
+//             //           itemCount: data.size,
+//             //           itemBuilder: (context, index) {
+//             //             Map item = data.docs[index].data() as Map;
+//             //             return Card(
+//             //               child: ListTile(
+//             //                 leading: Icon(Icons.article),
+//             //                 title: item['title'],
+//             //                 subtitle: item['content'],
+//             //                 trailing: Column(
+//             //                   children: [
+//             //                     IconButton(
+//             //                       onPressed: () {
+//             //                         print(
+//             //                             "Edit $index - id: ${item['documentId']}");
+//             //                       },
+//             //                       icon: Icon(Icons.edit),
+//             //                     ),
+//             //                     IconButton(
+//             //                       onPressed: () {
+//             //                         print(
+//             //                             "Delete $index  - id: ${item['documentId ']}");
+//             //                       },
+//             //                       icon: Icon(Icons.delete),
+//             //                     )
+//             //                   ],
+//             //                 ),
+//             //               ),
+//             //             );
+//             //           }),
+//             //     );
+//             //   },
+//             // ),
+//             StreamBuilder<QuerySnapshot>(
+//               stream: _allBlogs,
+//               builder: (BuildContext context,
+//                   AsyncSnapshot<QuerySnapshot> snapshot) {
+//                 if (snapshot.hasError) {
+//                   return Center(
+//                     child: Text(
+//                         "Echec du chargement des données ! ${snapshot.error}"),
+//                   );
+//                 }
+
+//                 if (!snapshot.hasData) {
+//                   return const Center(
+//                     child: CircularProgressIndicator(color: Colors.orange),
+//                   );
+//                 }
+
+//                 return ListView(
+//                   children: snapshot.data!.docs.map(
+//                     (DocumentSnapshot document) {
+//                       Map<String, dynamic> data =
+//                           document.data()! as Map<String, dynamic>;
+//                       return ListTile(
+//                         title: Text(
+//                           data['title'].toString(),
+//                         ),
+//                         subtitle: Text(
+//                           data['content'].toString(),
+//                         ),
+//                         leading: const Icon(
+//                           Icons.pages_outlined,
+//                         ),
+//                         trailing: const Column(
+//                           children: [
+//                             IconButton.outlined(
+//                               onPressed: null,
+//                               icon: Icon(Icons.edit),
+//                             ),
+//                             IconButton(
+//                               onPressed: null,
+//                               icon: Icon(Icons.delete),
+//                             ),
+//                             IconButton(
+//                               onPressed: null,
+//                               icon: Icon(Icons.remove_red_eye_sharp),
+//                             ),
+//                           ],
+//                         ),
+//                       );
+//                     },
+//                   ).toList(),
+//                 );
+//               },
+//             ),
+//           ],
+//         ),
+//       ),
+     
