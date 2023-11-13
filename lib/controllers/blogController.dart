@@ -69,13 +69,13 @@ class BlogController extends StatelessWidget {
                                       "Echec de la suppression de l'utilisateur");
                                 }
                               },
-                              icon: Icon(Icons.delete),
+                              icon: const Icon(Icons.delete),
                             ),
                             IconButton(
                               onPressed: () {
                                 getBlogId(documents![index].id);
                               },
-                              icon: Icon(
+                              icon: const Icon(
                                 Icons.edit,
                               ),
                             ),
