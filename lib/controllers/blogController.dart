@@ -45,7 +45,7 @@ class BlogController extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Code : ${data['blogID']}",
+                          "Code : ${documents![index].id}",
                         ),
                         Text(
                           'Title : ${data['title']}',
@@ -60,14 +60,38 @@ class BlogController extends StatelessWidget {
                           children: [
                             IconButton(
                               onPressed: () {
-                                var del = blogService
-                                    .deleteBlog(documents?[index].id);
-                                if (del) {
-                                  print("Utilisateur supprimé avec succès !");
-                                } else {
-                                  print(
-                                      "Echec de la suppression de l'utilisateur");
-                                }
+                                showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title:
+                                            const Text("Suppression d'article"),
+                                        content: const Text(
+                                            "Confirmez vous le suppression du blogue ?"),
+                                        actions: [
+                                          ElevatedButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context),
+                                            child: const Text("Annuler"),
+                                          ),
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              var del = blogService.deleteBlog(
+                                                  documents?[index].id);
+                                              if (del) {
+                                                print(
+                                                    "Utilisateur supprimé avec succès !");
+                                              } else {
+                                                print(
+                                                    "Echec de la suppression de l'utilisateur");
+                                              }
+                                              Navigator.pop(context);
+                                            },
+                                            child: Text("Confirmer"),
+                                          ),
+                                        ],
+                                      );
+                                    });
                               },
                               icon: const Icon(Icons.delete),
                             ),

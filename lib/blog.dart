@@ -65,7 +65,29 @@ class _BlogPageState extends State<BlogPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text("Déconnexion"),
+                      content: Text("Confirmez vous la déconnexion ?"),
+                      actions: [
+                        ElevatedButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text("Non"),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                          },
+                          child: Text("Oui"),
+                        ),
+                      ],
+                    );
+                  });
+            },
             child: const Text(
               "Déconnexion",
               style: TextStyle(color: Colors.white),
